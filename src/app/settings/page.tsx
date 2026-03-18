@@ -21,6 +21,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { useThemeStore } from '@/stores/theme-store';
+import { useOnboardingStore } from '@/stores/onboarding-store';
 import type { ThemeMode } from '@/types';
 
 // ---------------------------------------------------------------------------
@@ -43,6 +44,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const { mode, setMode } = useThemeStore();
+  const { reset: resetOnboarding } = useOnboardingStore();
 
   const deleteModal = useDisclosure();
 
@@ -134,14 +136,25 @@ export default function SettingsPage() {
             value={formatLifeStage(user?.life_stage)}
           />
 
-          <Button
-            variant="bordered"
-            size="sm"
-            className="mt-1"
-            onPress={() => alert('Edit profile coming soon!')}
-          >
-            Edit Profile
-          </Button>
+          <div className="flex gap-2 mt-1">
+            <Button
+              variant="bordered"
+              size="sm"
+              onPress={() => alert('Edit profile coming soon!')}
+            >
+              Edit Profile
+            </Button>
+            <Button
+              variant="bordered"
+              size="sm"
+              onPress={() => {
+                resetOnboarding();
+                router.push('/onboarding');
+              }}
+            >
+              Redo Onboarding
+            </Button>
+          </div>
         </CardBody>
       </Card>
 
