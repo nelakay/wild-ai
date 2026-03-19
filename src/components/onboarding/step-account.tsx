@@ -5,10 +5,9 @@ import { motion } from 'framer-motion';
 import {
   Button,
   Checkbox,
-  Divider,
   Input,
 } from '@heroui/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useOnboardingStore } from '@/stores/onboarding-store';
 import { useAuthStore } from '@/stores/auth-store';
 import type { User } from '@/types';
@@ -25,8 +24,12 @@ const itemVariants = {
 
 export function StepAccount() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data } = useOnboardingStore();
   const { setUser } = useAuthStore();
+
+  const initialMode = searchParams.get('mode') === 'login' ? 'login' : 'signup';
+  const [formMode, setFormMode] = useState<'signup' | 'login'>(initialMode);
 
   // Sign-up state
   const [email, setEmail] = useState('');
@@ -135,10 +138,12 @@ export function StepAccount() {
         transition={{ duration: 0.5 }}
       >
         <h2 className="text-2xl font-bold text-center mb-2">
-          Create Your Account
+          {formMode === 'login' ? 'Welcome Back' : 'Create Your Account'}
         </h2>
         <p className="text-center text-default-500 mb-8">
-          Secure your personalized experience.
+          {formMode === 'login'
+            ? 'Sign in to access your personalized experience.'
+            : 'Secure your personalized experience.'}
         </p>
       </motion.div>
 
@@ -148,156 +153,185 @@ export function StepAccount() {
         initial="hidden"
         animate="visible"
       >
-        {/* Email */}
-        <motion.div variants={itemVariants}>
-          <Input
-            label="Email"
-            placeholder="you@example.com"
-            type="email"
-            value={email}
-            onValueChange={setEmail}
-            variant="flat"
-            size="lg"
-          />
-        </motion.div>
+        {formMode === 'signup' && (
+          <>
+            {/* Email */}
+            <motion.div variants={itemVariants}>
+              <Input
+                label="Email"
+                placeholder="you@example.com"
+                type="email"
+                value={email}
+                onValueChange={setEmail}
+                variant="flat"
+                size="lg"
+              />
+            </motion.div>
 
-        {/* Password */}
-        <motion.div variants={itemVariants}>
-          <Input
-            label="Password"
-            placeholder="At least 6 characters"
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onValueChange={setPassword}
-            variant="flat"
-            size="lg"
-            endContent={
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-xs text-default-400 hover:text-default-600 px-2"
+            {/* Password */}
+            <motion.div variants={itemVariants}>
+              <Input
+                label="Password"
+                placeholder="At least 6 characters"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onValueChange={setPassword}
+                variant="flat"
+                size="lg"
+                endContent={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-xs text-default-400 hover:text-default-600 px-2"
+                  >
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
+                }
+              />
+            </motion.div>
+
+            {/* Consent checkboxes */}
+            <motion.div variants={itemVariants} className="flex flex-col gap-3">
+              <Checkbox
+                isSelected={healthConsent}
+                onValueChange={setHealthConsent}
+                size="sm"
               >
-                {showPassword ? 'Hide' : 'Show'}
-              </button>
-            }
-          />
-        </motion.div>
+                <span className="text-sm">
+                  I consent to Wild.AI processing my health data to provide
+                  personalized recommendations{' '}
+                  <span className="text-danger">*</span>
+                </span>
+              </Checkbox>
 
-        {/* Consent checkboxes */}
-        <motion.div variants={itemVariants} className="flex flex-col gap-3">
-          <Checkbox
-            isSelected={healthConsent}
-            onValueChange={setHealthConsent}
-            size="sm"
-          >
-            <span className="text-sm">
-              I consent to Wild.AI processing my health data to provide
-              personalized recommendations{' '}
-              <span className="text-danger">*</span>
-            </span>
-          </Checkbox>
+              <Checkbox
+                isSelected={analyticsConsent}
+                onValueChange={setAnalyticsConsent}
+                size="sm"
+              >
+                <span className="text-sm">
+                  I consent to anonymous analytics to improve the app
+                </span>
+              </Checkbox>
 
-          <Checkbox
-            isSelected={analyticsConsent}
-            onValueChange={setAnalyticsConsent}
-            size="sm"
-          >
-            <span className="text-sm">
-              I consent to anonymous analytics to improve the app
-            </span>
-          </Checkbox>
+              <Checkbox
+                isSelected={marketingConsent}
+                onValueChange={setMarketingConsent}
+                size="sm"
+              >
+                <span className="text-sm">
+                  I&apos;d like to receive updates about Wild.AI
+                </span>
+              </Checkbox>
+            </motion.div>
 
-          <Checkbox
-            isSelected={marketingConsent}
-            onValueChange={setMarketingConsent}
-            size="sm"
-          >
-            <span className="text-sm">
-              I&apos;d like to receive updates about Wild.AI
-            </span>
-          </Checkbox>
-        </motion.div>
+            {/* Error message */}
+            {errorMessage && (
+              <motion.div variants={itemVariants}>
+                <p className="text-sm text-danger text-center">{errorMessage}</p>
+              </motion.div>
+            )}
 
-        {/* Error message */}
-        {errorMessage && (
-          <motion.div variants={itemVariants}>
-            <p className="text-sm text-danger text-center">{errorMessage}</p>
-          </motion.div>
+            {/* Create Account button */}
+            <motion.div variants={itemVariants}>
+              <Button
+                size="lg"
+                color="primary"
+                className="w-full font-semibold"
+                isDisabled={!canCreateAccount}
+                isLoading={isSubmitting}
+                onPress={handleCreateAccount}
+              >
+                Create Account
+              </Button>
+            </motion.div>
+
+            {/* Switch to login */}
+            <motion.div variants={itemVariants}>
+              <p className="text-sm text-center text-default-500">
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => { setErrorMessage(''); setFormMode('login'); }}
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Log In
+                </button>
+              </p>
+            </motion.div>
+          </>
         )}
 
-        {/* Create Account button */}
-        <motion.div variants={itemVariants}>
-          <Button
-            size="lg"
-            color="primary"
-            className="w-full font-semibold"
-            isDisabled={!canCreateAccount}
-            isLoading={isSubmitting}
-            onPress={handleCreateAccount}
-          >
-            Create Account
-          </Button>
-        </motion.div>
+        {formMode === 'login' && (
+          <>
+            <motion.div variants={itemVariants}>
+              <Input
+                label="Email"
+                placeholder="you@example.com"
+                type="email"
+                value={signInEmail}
+                onValueChange={setSignInEmail}
+                variant="flat"
+                size="lg"
+              />
+            </motion.div>
 
-        {/* Divider */}
-        <motion.div variants={itemVariants}>
-          <div className="flex items-center gap-4 my-2">
-            <Divider className="flex-1" />
-            <span className="text-sm text-default-400">or</span>
-            <Divider className="flex-1" />
-          </div>
-        </motion.div>
+            <motion.div variants={itemVariants}>
+              <Input
+                label="Password"
+                placeholder="Your password"
+                type={showSignInPassword ? 'text' : 'password'}
+                value={signInPassword}
+                onValueChange={setSignInPassword}
+                variant="flat"
+                size="lg"
+                endContent={
+                  <button
+                    type="button"
+                    onClick={() => setShowSignInPassword(!showSignInPassword)}
+                    className="text-xs text-default-400 hover:text-default-600 px-2"
+                  >
+                    {showSignInPassword ? 'Hide' : 'Show'}
+                  </button>
+                }
+              />
+            </motion.div>
 
-        {/* Sign in with existing account */}
-        <motion.div variants={itemVariants}>
-          <p className="text-sm font-semibold mb-3 text-center">
-            Sign in with existing account
-          </p>
-        </motion.div>
+            {/* Error message */}
+            {errorMessage && (
+              <motion.div variants={itemVariants}>
+                <p className="text-sm text-danger text-center">{errorMessage}</p>
+              </motion.div>
+            )}
 
-        <motion.div variants={itemVariants}>
-          <Input
-            label="Email"
-            placeholder="you@example.com"
-            type="email"
-            value={signInEmail}
-            onValueChange={setSignInEmail}
-            variant="flat"
-          />
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <Input
-            label="Password"
-            placeholder="Your password"
-            type={showSignInPassword ? 'text' : 'password'}
-            value={signInPassword}
-            onValueChange={setSignInPassword}
-            variant="flat"
-            endContent={
-              <button
-                type="button"
-                onClick={() => setShowSignInPassword(!showSignInPassword)}
-                className="text-xs text-default-400 hover:text-default-600 px-2"
+            <motion.div variants={itemVariants}>
+              <Button
+                size="lg"
+                color="primary"
+                className="w-full font-semibold"
+                isDisabled={!canSignIn}
+                isLoading={isSubmitting}
+                onPress={handleSignIn}
               >
-                {showSignInPassword ? 'Hide' : 'Show'}
-              </button>
-            }
-          />
-        </motion.div>
+                Sign In
+              </Button>
+            </motion.div>
 
-        <motion.div variants={itemVariants}>
-          <Button
-            size="lg"
-            variant="flat"
-            className="w-full font-semibold"
-            isDisabled={!canSignIn}
-            isLoading={isSubmitting}
-            onPress={handleSignIn}
-          >
-            Sign In
-          </Button>
-        </motion.div>
+            {/* Switch to signup */}
+            <motion.div variants={itemVariants}>
+              <p className="text-sm text-center text-default-500">
+                Don&apos;t have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => { setErrorMessage(''); setFormMode('signup'); }}
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Create One
+                </button>
+              </p>
+            </motion.div>
+          </>
+        )}
       </motion.div>
     </div>
   );

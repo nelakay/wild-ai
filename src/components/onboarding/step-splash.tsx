@@ -108,7 +108,7 @@ export function StepSplash() {
           size="lg"
           variant="bordered"
           className="mt-3 px-8 py-6 text-lg font-semibold text-white/80 border-white/30"
-          onPress={() => router.push('/onboarding?step=7')}
+          onPress={() => router.push('/onboarding?step=7&mode=login')}
         >
           Log In
         </Button>
