@@ -15,6 +15,7 @@ import {
   useDisclosure,
 } from '@heroui/react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { usePhaseStore } from '@/stores/phase-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { computePhase } from '@/engine/phase-engine';
@@ -58,7 +59,8 @@ function getMockCycleDay(): number {
 }
 
 export default function HomePage() {
-  const { user } = useAuthStore();
+  const router = useRouter();
+  const { user, isAuthenticated } = useAuthStore();
   const {
     currentPhase,
     setCurrentPhase,
@@ -73,15 +75,25 @@ export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Try fetching live data from Supabase
-  const { data: dailyCard, isLoading: queryLoading } = useDailyCard();
+  const { data: dailyCard, isLoading: queryLoading, error: queryError, refetch } = useDailyCard();
 
-  // Fallback: compute client-side if not authenticated or API fails
+  // Redirect unauthenticated users to onboarding
   useEffect(() => {
-    if (dailyCard || queryLoading) return; // Live data handled by React Query
+    if (!queryLoading && !isAuthenticated && !user) {
+      router.replace('/onboarding');
+    }
+  }, [queryLoading, isAuthenticated, user, router]);
+
+  // Fallback: compute client-side if API fails but user is authenticated
+  useEffect(() => {
+    if (dailyCard || queryLoading) return;
     if (currentPhase) {
       setLoading(false);
       return;
     }
+
+    // Only compute fallback if we have a user (API failed)
+    if (!user) return;
 
     const lifeStage = user?.life_stage ?? 'menstrual_cycle';
     const cycleDay =
@@ -178,6 +190,36 @@ export default function HomePage() {
     return (
       <div className="flex items-center justify-center min-h-[60dvh]">
         <Spinner size="lg" color="primary" label="Preparing your day..." />
+      </div>
+    );
+  }
+
+  if (queryError && !currentPhase) {
+    const isUnauth = queryError.message === 'unauthorized';
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60dvh] px-6 text-center gap-4">
+        <p className="text-4xl">{isUnauth ? '\u{1F512}' : '\u{1F331}'}</p>
+        <p className="text-lg font-semibold">
+          {isUnauth ? 'You need to sign in' : 'Something went wrong'}
+        </p>
+        <p className="text-sm text-default-500">
+          {isUnauth
+            ? 'Log in or create an account to see your personalized daily card.'
+            : "There's a little glitch. Try refreshing to load your data."}
+        </p>
+        <Button
+          color="primary"
+          variant={isUnauth ? 'solid' : 'bordered'}
+          onPress={() => {
+            if (isUnauth) {
+              router.push('/onboarding');
+            } else {
+              refetch();
+            }
+          }}
+        >
+          {isUnauth ? 'Sign In' : 'Refresh'}
+        </Button>
       </div>
     );
   }

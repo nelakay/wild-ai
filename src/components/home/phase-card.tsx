@@ -2,6 +2,7 @@
 
 import { Card, CardBody } from '@heroui/react';
 import { motion } from 'framer-motion';
+import { PHASE_LABELS } from '@/lib/constants';
 
 interface PhaseCardProps {
   phaseName: string;
@@ -48,8 +49,8 @@ export function PhaseCard({
             <h2 className="text-xl font-bold text-white truncate">
               {biomeLabel}
             </h2>
-            <p className="text-white/80 text-sm capitalize">
-              {phaseName} phase &middot; {dayLabel}
+            <p className="text-white/80 text-sm">
+              {PHASE_LABELS[phaseName] ?? phaseName} &middot; {dayLabel}
             </p>
             {cycleDayLabel && (
               <p className="text-white/60 text-xs mt-0.5">{cycleDayLabel}</p>
