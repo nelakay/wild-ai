@@ -202,6 +202,7 @@ export interface RecommendationSummary {
   summary: string;
   details: string;
   tips: string[];
+  why: string;
 }
 
 // --- Onboarding types ---

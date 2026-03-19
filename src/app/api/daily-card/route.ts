@@ -113,13 +113,13 @@ export async function GET() {
       });
       recommendations = {
         training: byType.training
-          ? { title: byType.training.content.title, summary: byType.training.content.summary, details: byType.training.content.guidelines?.join('\n') ?? '', tips: byType.training.content.guidelines ?? [] }
+          ? { title: byType.training.content.title, summary: byType.training.content.summary, details: byType.training.content.guidelines?.join('\n') ?? '', tips: byType.training.content.guidelines ?? [], why: phaseOutput.recommendations.training.why }
           : phaseOutput.recommendations.training,
         nutrition: byType.nutrition
-          ? { title: byType.nutrition.content.title, summary: byType.nutrition.content.summary, details: byType.nutrition.content.guidelines?.join('\n') ?? '', tips: byType.nutrition.content.guidelines ?? [] }
+          ? { title: byType.nutrition.content.title, summary: byType.nutrition.content.summary, details: byType.nutrition.content.guidelines?.join('\n') ?? '', tips: byType.nutrition.content.guidelines ?? [], why: phaseOutput.recommendations.nutrition.why }
           : phaseOutput.recommendations.nutrition,
         recovery: byType.recovery
-          ? { title: byType.recovery.content.title, summary: byType.recovery.content.summary, details: byType.recovery.content.guidelines?.join('\n') ?? '', tips: byType.recovery.content.guidelines ?? [] }
+          ? { title: byType.recovery.content.title, summary: byType.recovery.content.summary, details: byType.recovery.content.guidelines?.join('\n') ?? '', tips: byType.recovery.content.guidelines ?? [], why: phaseOutput.recommendations.recovery.why }
           : phaseOutput.recommendations.recovery,
       };
     }

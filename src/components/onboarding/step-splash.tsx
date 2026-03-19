@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Button } from '@heroui/react';
+import { useRouter } from 'next/navigation';
 import { useOnboardingStore } from '@/stores/onboarding-store';
 import { BIOME_CONFIG } from '@/lib/constants';
 
@@ -48,6 +49,7 @@ function PhaseOrb({ color, delay, x, y, size }: {
 
 export function StepSplash() {
   const { nextStep } = useOnboardingStore();
+  const router = useRouter();
 
   return (
     <div className="relative min-h-dvh flex flex-col items-center justify-center bg-black overflow-hidden px-6">
@@ -101,6 +103,14 @@ export function StepSplash() {
           onPress={nextStep}
         >
           Begin Your Journey
+        </Button>
+        <Button
+          size="lg"
+          variant="bordered"
+          className="mt-3 px-8 py-6 text-lg font-semibold text-white/80 border-white/30"
+          onPress={() => router.push('/onboarding?step=7')}
+        >
+          Log In
         </Button>
       </motion.div>
     </div>

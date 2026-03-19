@@ -15,8 +15,8 @@ import {
 } from '@heroui/react';
 import { differenceInDays } from 'date-fns';
 import { useOnboardingStore } from '@/stores/onboarding-store';
-import { computePhase, getConfidenceLabel } from '@/engine/phase-engine';
-import { BIOME_CONFIG } from '@/lib/constants';
+import { computePhase, getConfidenceLabel, PHASE_SCIENCE, CONFIDENCE_EXPLANATIONS } from '@/engine/phase-engine';
+import { BIOME_CONFIG, PHASE_LABELS } from '@/lib/constants';
 import type { BiomeKey } from '@/lib/constants';
 import type { PhaseInput, RecommendationType } from '@/types';
 
@@ -87,6 +87,10 @@ export function StepPhaseReveal() {
   const recommendations = phaseOutput.recommendations;
   const recTypes: RecommendationType[] = ['training', 'nutrition', 'recovery'];
 
+  const phaseScience = PHASE_SCIENCE[phaseOutput.phase_name] ?? PHASE_SCIENCE.MF;
+  const confidenceExplanation = CONFIDENCE_EXPLANATIONS[confidenceLabel] ?? '';
+  const phaseLabel = PHASE_LABELS[phaseOutput.phase_name] ?? phaseOutput.phase_name;
+
   const handleContinue = () => {
     setPhaseRevealed(true);
     nextStep();
@@ -132,7 +136,7 @@ export function StepPhaseReveal() {
         </motion.div>
 
         <motion.p
-          className="text-center text-lg text-default-600 mb-2"
+          className="text-center text-lg text-default-600 mb-1"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
@@ -140,9 +144,24 @@ export function StepPhaseReveal() {
           Here is what your body can do today.
         </motion.p>
 
+        {/* Phase science context */}
+        <motion.div
+          className="text-center mb-3 px-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+        >
+          <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: biome.color }}>
+            {phaseLabel}
+          </p>
+          <p className="text-xs text-default-500 leading-relaxed max-w-sm mx-auto">
+            {phaseScience.detail}
+          </p>
+        </motion.div>
+
         {/* Confidence badge */}
         <motion.div
-          className="flex justify-center mb-6"
+          className="flex flex-col items-center gap-1 mb-6"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.8 }}
@@ -150,6 +169,9 @@ export function StepPhaseReveal() {
           <Chip color={confidenceColor} variant="flat" size="sm">
             Insight quality: {confidenceLabel}
           </Chip>
+          <p className="text-xs text-default-400 text-center max-w-xs">
+            {confidenceExplanation}
+          </p>
         </motion.div>
 
         {/* Recommendation cards */}
@@ -179,6 +201,10 @@ export function StepPhaseReveal() {
                   </CardHeader>
                   <CardBody className="pt-0">
                     <p className="text-sm text-default-500">{rec.summary}</p>
+                    <p className="text-xs text-default-400 mt-1.5">
+                      <span className="font-bold text-default-500">Why: </span>
+                      {rec.why}
+                    </p>
                   </CardBody>
                 </Card>
               </motion.div>
