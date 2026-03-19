@@ -125,6 +125,7 @@ export function CheckInDrawer({ isOpen, onOpenChange }: CheckInDrawerProps) {
       user_id: '',
       date: new Date().toISOString().split('T')[0],
       phase_state_id: '',
+      notes: null,
       ...payload,
     };
     setTodayCheckIn(localCheckIn);

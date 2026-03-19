@@ -106,6 +106,7 @@ export interface CheckIn {
   stress: number;
   performance_feel: number;
   extended_symptoms: Record<string, number> | null;
+  notes: string | null;
 }
 
 export interface RecommendationContent {
